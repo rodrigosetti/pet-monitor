@@ -1,25 +1,33 @@
 extends ../node_modules/pug-bootstrap/_bootstrap
 
 append body
-     div(class="container")
-         h2 Current weight: #{weightNow} g
+     .container
+         h2 Current: #{weightNow} g, #{temperature}° C
 
-         +panel-default("Totals")
-            p Consumed: #{totalConsumed} g
-            p Filled: #{totalFilled} g
-            p Balance: #{totalFilled - totalConsumed} g
+         form(method='GET', action='/').form-inline
+            .form-group
+                input(type="text", name="q", id="q", value=query).form-control
+                button(type="submit").btn.btn-default OK
 
-         form(method='GET', action='/', class=form-inline)
-            input(type="text", name="q", id="q", class="form-control", value=query)
-            +submit("OK")
+         hr
 
          +panel-default(sinceStr + " to " + toStr)
+
+            table.table
+                tr: td Total consumed
+                    td #{totalConsumed} g
+                tr: td Total refilled
+                    td #{totalFilled} g
+                tr: td Balance
+                    td #{totalFilled - totalConsumed} g
+
             +list-group-custom()
                 each row in rows
                      +list-group-item()
                         - let what = row.delta < 0 ? 'consumed' : 'refilled';
                         - let quantity = Math.abs(row.delta);
                         h4.list-group-item-heading #{what} #{quantity} g
-                        p.list-group-item-text= new Date(row.timestamp * 1000).toLocaleTimeString()
-
+                        p.list-group-item-text= row.timestampStr
+                        if typeof(row.temperature) === "number"
+                            p.list-group-item-text #{row.temperature}° C
 

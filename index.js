@@ -6,8 +6,10 @@ let winston = require('winston');
 let config = require('config');
 let sqlite3 = require('sqlite3');
 let morgan = require('morgan');
+let dateformat = require('dateformat');
 
-// ----------------------------------------------
+dateformat.masks.dayMinute = "m/d/yyyy h:MM tt"
+
 const RAW_TARE = config.get('raw_tare');
 const CONTAINER_TARE = config.get('container_tare');
 const CALIBRATION_G = config.get('calibration_g');
@@ -37,9 +39,11 @@ function calibratedScale(raw) {
     return Math.round( (RAW_TARE - raw) / CALIBRATION_G );
 }
 
+// shared between "data" events and/or web-server
 var ready = false;
 let weightWindow = [];
 var lastStable = undefined;
+var temperature = undefined;
 
 port.on('data', (line) => {
     line = line.trim();
@@ -51,11 +55,11 @@ port.on('data', (line) => {
 
         let weight = calibratedScale( parseFloat(parts[2]) )
                      - CONTAINER_TARE;
-        let localTemp = parseFloat(parts[3]);
+        temperature = parseFloat(parts[3]);
         let now = Date.now() / 1000; // in seconds
 
         winston.debug('weight: %s g, stable: %s g, temp: %s C',
-                weight, lastStable, localTemp);
+                weight, lastStable, temperature);
 
         weightWindow.push( weight );
         if (weightWindow.length > STABLE_N) { weightWindow.shift(); }
@@ -68,7 +72,7 @@ port.on('data', (line) => {
             if (lastStable !== undefined) {
                 let delta = weight - lastStable
 
-                if (Math.abs(delta) > 1) {
+                if (Math.abs(delta) > 0) {
                     if (delta > 0) {
                         // fill
                         winston.info('FILL: %s g', delta);
@@ -76,11 +80,12 @@ port.on('data', (line) => {
                         // consume
                         winston.info('CONSUMED: %s g', -delta);
                     }
-                    db.run('INSERT INTO deltas VALUES (NULL, $now, $delta, $weight)',
+                    db.run('INSERT INTO deltas VALUES (NULL, $now, $delta, $weight, $temperature)',
                             {
                                 $now: now,
                                 $delta: delta,
-                                $weight: weight
+                                $weight: weight,
+                                $temperature: temperature
                             });
                 }
             }
@@ -124,14 +129,20 @@ app.get('/', (req, res) => {
             let totalConsumed = rows.reduce((acc, r) => { return acc - (r.delta < 0 ? r.delta : 0); }, 0);
             let totalFilled = rows.reduce((acc, r) => { return acc + (r.delta > 0 ? r.delta : 0); }, 0);
 
+            // some presentation transformations
+            rows.forEach((r) => {
+                r.timestampStr = dateformat(r.timestamp * 1000, "dayMinute");
+            });
+
             res.render('index', {
                 query,
                 weightNow: weightWindow.length > 0 ? weightWindow[weightWindow.length-1] : 'unknown',
                 rows,
                 totalConsumed,
                 totalFilled,
-                sinceStr : new Date(sinceTS * 1000).toLocaleString(),
-                toStr : new Date(toTS * 1000).toLocaleString()
+                temperature,
+                sinceStr : dateformat(sinceTS * 1000, "dayMinute"),
+                toStr : dateformat(toTS * 1000, "dayMinute")
             })
         }
     });
