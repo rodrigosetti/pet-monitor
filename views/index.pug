@@ -1,24 +1,25 @@
 extends ../node_modules/pug-bootstrap/_bootstrap
 
 append body
-     h2 Current weight: #{weightNow} g
+     div(class="container")
+         h2 Current weight: #{weightNow} g
 
-     +panel-default("Totals")
-        p Consumed: #{totalConsumed} g
-        p Filled: #{totalFilled} g
-        p Balance: #{totalFilled - totalConsumed} g
+         +panel-default("Totals")
+            p Consumed: #{totalConsumed} g
+            p Filled: #{totalFilled} g
+            p Balance: #{totalFilled - totalConsumed} g
 
-     form(method='GET', action='/', class=form-inline)
-        input(type="text", name="q", id="q", class="form-control", value=query)
-        +submit("OK")
+         form(method='GET', action='/', class=form-inline)
+            input(type="text", name="q", id="q", class="form-control", value=query)
+            +submit("OK")
 
-     +panel-default(sinceStr + " to " + toStr)
-        +list-group-custom()
-            each row in rows
-                 +list-group-item()
-                    - let what = row.delta < 0 ? 'consumed' : 'refilled';
-                    - let quantity = Math.abs(row.delta);
-                    h4.list-group-item-heading #{what} #{quantity} g
-                    p.list-group-item-text= new Date(row.timestamp * 1000).toLocaleTimeString()
+         +panel-default(sinceStr + " to " + toStr)
+            +list-group-custom()
+                each row in rows
+                     +list-group-item()
+                        - let what = row.delta < 0 ? 'consumed' : 'refilled';
+                        - let quantity = Math.abs(row.delta);
+                        h4.list-group-item-heading #{what} #{quantity} g
+                        p.list-group-item-text= new Date(row.timestamp * 1000).toLocaleTimeString()
 
 
