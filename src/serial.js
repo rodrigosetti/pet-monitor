@@ -58,7 +58,7 @@ if (config.get('serial.enabled')) {
                 if (lastStable !== undefined) {
                     const delta = weight - lastStable;
 
-                    if (Math.abs(delta) > 0) {
+                    if (Math.abs(delta) > 1) {
                         if (delta > 0) {
                             // fill
                             winston.info('FILL: %s g', delta);
