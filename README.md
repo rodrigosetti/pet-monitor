@@ -3,8 +3,15 @@
 Make your pet's food bowl smarter by tracking refilling and consumption
 automatically.
 
-Reads data from [Open-Scale device](https://github.com/sparkfun/OpenScale)
-connected to a serial port, and writes it into
+Why
+---
+
+We all love our pets. Sometimes they get sick, and they might be masters in
+masking their symptoms (specially cats). Lack of appetite or appetite disorders,
+in general, can be an indicator of a underlying serious condition. The early we
+caught those on, the better. This tool hopefully would allow pet owners to
+identify eating habits anomalies prematurely, additionally, provide them with
+data to better inform decisions.
 
 Features
 --------
@@ -51,6 +58,9 @@ Requirements
    by [the firmware](https://github.com/sparkfun/OpenScale).
  * A small computer like [Raspberry PI](https://www.raspberrypi.org/), with
    access to the Internet, so that it can run a server.
+   
+NOTE: if using OpenScale, you need to configure it first to 1) disable
+timestamp, disable remote temperature, and enable raw.
 
 #### Diagram
 
@@ -69,3 +79,5 @@ Requirements
     `.       ,'          └───────────┘    └───────────┘
       `─────'
 ```
+
+![picture](images/pict1.jpg?raw=true "Picture")
