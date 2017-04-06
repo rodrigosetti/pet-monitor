@@ -5,6 +5,8 @@ automatically.
 
 ![picture](images/pict1.jpg?raw=true "Picture")
 
+![Screenshot](images/screenshot1.jpg?raw=true "Screenshot 1") ![Screenshot](images/screenshot2.jpg?raw=true "Screenshot 2")
+
 Why
 ---
 
@@ -45,7 +47,8 @@ Requirements
   $ sqlite3 data.db < schema.sql
   ```
  4. install dependencies: `npm install`
- 4. run: `npm start`
+ 5. run: `npm start`
+ 6. your device should be serving a web application at port 8080
 
 #### Extras
 
