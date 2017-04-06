@@ -25,5 +25,4 @@ block content
             - let quantity = Math.abs(row.delta);
             h4.list-group-item-heading #{what} #{quantity} g
             p.list-group-item-text= row.timestampStr
-            if typeof(row.temperature) === "number"
             p.list-group-item-text #{row.weight} g | #{row.temperature}° C
