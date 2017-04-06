@@ -1,5 +1,5 @@
 {
-  "name": "cat-scale",
+  "name": "smart-pet-food-tracker",
   "version": "1.0.0",
   "description": "Cat Scale Application",
   "main": "src/index.js",
@@ -7,13 +7,23 @@
     "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines" : { "node" : ">=7.7.4" },
   "keywords": [
     "cat",
     "open-scale",
     "scale"
   ],
   "author": "Rodrigo Setti",
-  "license": "ISC",
+  "bugs": "https://github.com/rodrigosetti/smart-pet-food-tracker/issues",
+  "repository": "https://github.com/rodrigosetti/smart-pet-food-tracker",
+  "homepage": "https://github.com/rodrigosetti/smart-pet-food-tracker",
+  "contributors": [
+    {
+      "name": "Rodrigo Setti",
+      "email": "rodrigosetti@gmail.com"
+    }
+  ],
+  "license": "MIT",
   "dependencies": {
     "config": "^1.25.1",
     "dateformat": "^2.0.0",
