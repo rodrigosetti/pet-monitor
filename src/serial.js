@@ -2,6 +2,7 @@
 
 const SerialPort = require('serialport');
 const config = require('config');
+const winston = require('winston');
 const db = require('./db');
 
 const RAW_TARE = config.get('raw_tare');
