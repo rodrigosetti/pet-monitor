@@ -3,6 +3,8 @@
 Make your pet's food bowl smarter by tracking refilling and consumption
 automatically.
 
+![picture](images/pict1.jpg?raw=true "Picture")
+
 Why
 ---
 
@@ -79,5 +81,3 @@ timestamp, disable remote temperature, and enable raw.
     `.       ,'          └───────────┘    └───────────┘
       `─────'
 ```
-
-![picture](images/pict1.jpg?raw=true "Picture")
