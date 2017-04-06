@@ -33,12 +33,12 @@ module.exports = (req, res) => {
                 });
 
                 res.render('index', {
-                    query,
                     weightNow: serial.getLastWeight(),
+                    temperature : serial.getLastTemperature(),
+                    query,
                     rows,
                     totalConsumed,
                     totalFilled,
-                    temperature : serial.getLastTemperature(),
                     sinceStr : dateformat(sinceTS * 1000, "dayMinute"),
                     toStr : dateformat(toTS * 1000, "dayMinute")
                 });

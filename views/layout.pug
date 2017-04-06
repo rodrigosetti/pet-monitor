@@ -7,7 +7,18 @@ html(lang="en")
         link(rel="icon",href="../../favicon.ico")
         title Food Intake Tracker Dashboard
         link(rel="stylesheet",href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css")
+        block header
     body
-        .content
-             block content
 
+        nav.navbar.navbar-inverse.navbar-static-top
+          .container-fluid
+            .navbar-header
+              p.navbar-text #{weightNow} g | #{temperature}° C
+
+            ul.nav.navbar-nav
+              li: a(href="/") Events
+              li: a(href="/trends") Trends
+              //li: a(href="/punchcard") Punch Card
+
+        .container-fluid
+          block content

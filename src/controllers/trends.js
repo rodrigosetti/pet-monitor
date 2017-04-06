@@ -1,11 +1,14 @@
 /* jshint node:true, esversion:6 */
 
 const winston = require('winston');
+const dateformat = require('dateformat');
 const db = require('../db');
+const serial = require('../serial');
 
 const DAY_SECONDS = 24 * 60 * 60;
 
-module.exports = (req, res) => {
+module.exports.api = (req, res) => {
+    const maxDays = req.query.days || 7;
 
     // get start of this day
     const dayStart = new Date();
@@ -16,24 +19,30 @@ module.exports = (req, res) => {
 
     const dayStartSec = dayStart.getTime() / 1000;
 
-    // do 7 queries (past seven days)
-    const consumptionPerDay = [];
-    let consumptionSum = 0;
+    const entries = [];
 
     function runThis(nDay) {
-        if (nDay === 7) {
-            winston.info('consumptionPerDay:', consumptionPerDay);
-            res.render('aggregate');
+        if (nDay === maxDays) {
+
+            res.json({
+                data: entries
+            });
         } else {
+            const since = dayStartSec - (DAY_SECONDS * (nDay+1));
+
             db.getConsumptionSum(
-                dayStartSec - (DAY_SECONDS * (nDay+1)),
+                since,
                 dayStartSec - (DAY_SECONDS * nDay),
                 (err, dsum) => {
                     if (err) {
                         winston.error(err);
                         res.send('Sorry, an error occurred. Go back and try again');
                     } else {
-                        consumptionPerDay.push( -dsum );
+                        entries.unshift({
+                            day: dateformat(since * 1000, "m/d"),
+                            consumption: -dsum
+                        });
+
                         runThis(nDay + 1);
                     }
                 });
@@ -41,4 +50,11 @@ module.exports = (req, res) => {
     }
 
     runThis(0);
+};
+
+module.exports.page = (req, res) => {
+    res.render('trends', {
+        weightNow: serial.getLastWeight(),
+        temperature : serial.getLastTemperature()
+    });
 };

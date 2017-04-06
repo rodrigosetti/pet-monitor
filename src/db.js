@@ -21,33 +21,33 @@ process.on('SIGEXIT', atExit);
 module.exports = {
     insert: ($now, $delta, $weight, $temperature) => {
         db.run('INSERT INTO deltas VALUES (NULL, $now, $delta, $weight, $temperature)',
-                {
-                    $now,
-                    $delta,
-                    $weight,
-                    $temperature
-                });
+               {
+                   $now,
+                   $delta,
+                   $weight,
+                   $temperature
+               });
     },
 
 
     getEvents : ($since, $to, callback) => {
         db.all(
-                'SELECT * FROM deltas WHERE timestamp >= $since AND timestamp <= $to ORDER BY timestamp DESC',
-                {
-                    $since,
-                    $to
-                },
-                callback);
+            'SELECT * FROM deltas WHERE timestamp >= $since AND timestamp <= $to ORDER BY timestamp DESC',
+            {
+                $since,
+                $to
+            },
+            callback);
     },
 
 
     getConsumptionSum: ($since, $to, callback) => {
-                db.get(
-                        'SELECT SUM(delta) as dsum FROM deltas WHERE timestamp >= $since AND timestamp < $to AND delta < 0',
-                        {
-                            $since,
-                            $to
-                        },
-                        (err, row) => { callback(err, row && row.dsum); });
+        db.get(
+            'SELECT SUM(delta) as dsum FROM deltas WHERE timestamp >= $since AND timestamp < $to AND delta < 0',
+            {
+                $since,
+                $to
+            },
+            (err, row) => { callback(err, row && row.dsum); });
     }
 };

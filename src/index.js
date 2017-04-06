@@ -25,7 +25,8 @@ if (config.get('enable_server')) {
      */
     app.get('/', controllers.main);
 
-    app.get('/aggregate', controllers.aggregate);
+    app.get('/trends', controllers.trends.page);
+    app.get('/api/trends', controllers.trends.api);
 
     app.listen(8080, () => {
         winston.info('Server running');

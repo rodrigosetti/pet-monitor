@@ -2,5 +2,5 @@
 
 module.exports = {
     main : require('./main'),
-    aggregate: require('./aggregate')
+    trends: require('./trends')
 };
