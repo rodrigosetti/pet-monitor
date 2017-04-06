@@ -1,42 +1,34 @@
-doctype html
-html(lang="en")
-    head
-        meta(charset="UTF-8")
-        meta(http-equiv="X-UA-Compatible", content="IE=edge")
-        meta(name="viewport",content="width=device-width, initial-scale=1")
-        link(rel="icon",href="../../favicon.ico")
-        title Food Intake Tracker Dashboard
-        link(rel="stylesheet",href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css")
-    body
-        .container
-            h2 Current: #{weightNow} g, #{temperature}° C
+extends ./layout
 
-            form(method='GET', action='/').form-inline
-               .form-group
-                   input(type="text", name="q", id="q", value=query).form-control
-                   button(type="submit").btn.btn-default OK
+block content
+  h2 Current: #{weightNow} g, #{temperature}° C
 
-            hr
+  form(method='GET', action='/').form-inline
+    .form-group
+       input(type="text", name="q", id="q", value=query).form-control
+       button(type="submit").btn.btn-default OK
 
-            .panel.panel-default
-                .panel-heading= sinceStr + " to " + toStr
-                .panel-body
+  hr
 
-                   table.table
-                       tr: td Total consumed
-                           td #{totalConsumed} g
-                       tr: td Total refilled
-                           td #{totalFilled} g
-                       tr: td Balance
-                           td #{totalFilled - totalConsumed} g
+  .panel.panel-default
+    .panel-heading= sinceStr + " to " + toStr
+    .panel-body
 
-                   .list-group
-                       each row in rows
-                            a(href='#').list-group-item
-                               - let what = row.delta < 0 ? 'consumed' : 'refilled';
-                               - let quantity = Math.abs(row.delta);
-                               h4.list-group-item-heading #{what} #{quantity} g
-                               p.list-group-item-text= row.timestampStr
-                               if typeof(row.temperature) === "number"
-                                   p.list-group-item-text #{row.temperature}° C
+       table.table
+           tr: td Total consumed
+           td #{totalConsumed} g
+           tr: td Total refilled
+           td #{totalFilled} g
+           tr: td Balance
+           td #{totalFilled - totalConsumed} g
+
+       .list-group
+           each row in rows
+            a(href='#').list-group-item
+               - let what = row.delta < 0 ? 'consumed' : 'refilled';
+               - let quantity = Math.abs(row.delta);
+               h4.list-group-item-heading #{what} #{quantity} g
+               p.list-group-item-text= row.timestampStr
+               if typeof(row.temperature) === "number"
+               p.list-group-item-text #{row.temperature}° C
 
