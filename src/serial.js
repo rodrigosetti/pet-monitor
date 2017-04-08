@@ -43,7 +43,7 @@ if (config.get('serial.enabled')) {
 
             const weight = calibratedScale( parseFloat(parts[2]) ) - CONTAINER_TARE;
             temperature = parseFloat(parts[3]);
-            const now = Date.now() / 1000; // in seconds
+            const now = new Date();
 
             winston.debug('weight: %s g, stable: %s g, temp: %s C',
                     weight, lastStable, temperature);
