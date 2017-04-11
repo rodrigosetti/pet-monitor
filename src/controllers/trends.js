@@ -16,12 +16,11 @@ module.exports.api = (req, res) => {
             res.send('Sorry, an error occurred. Go back and try again');
         } else {
             const formattedData = {};
-            const entries = [];
-            rows.forEach(r => {
-                entries.push({
+            const entries = rows.map(r => {
+                return {
                     day: dateformat(r.timestamp * 1000, "m/d"),
                     consumption: -r.dsum
-                });
+                }
             });
 
             res.json({

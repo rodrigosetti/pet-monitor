@@ -58,7 +58,7 @@ module.exports = {
     getTrends: (daysBack, callback) => {
         const today = computeDays(new Date());
 
-        db.all("SELECT SUM(delta) AS dsum, timestamp FROM deltas WHERE delta < 0 AND days >= $since AND days < $to GROUP BY days ORDER BY days DESC",
+        db.all("SELECT SUM(delta) AS dsum, timestamp FROM deltas WHERE delta < 0 AND days >= $since AND days < $to GROUP BY days ORDER BY days",
                {
                    $since: today - daysBack,
                    $to: today
