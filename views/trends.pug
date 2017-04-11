@@ -12,53 +12,56 @@ append header
   .axis--x path {
     display: none;
   }
+  svg {
+    width: 100%;
+  }
 
 block content
   .row
     .col-md-12
-      svg(style="width:100%", height=500)#chart
+      svg(height=500)#chart
 
-      script.
-        var chartElem = document.getElementById('chart'),
-        svg = d3.select("svg"),
-        margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width  = chartElem.getBoundingClientRect().width - margin.left - margin.right,
-        height = chartElem.getBoundingClientRect().height - margin.top - margin.bottom;
+  script.
+    var chartElem = document.getElementById('chart'),
+    svg = d3.select("svg"),
+    margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width  = chartElem.getBoundingClientRect().width - margin.left - margin.right,
+    height = chartElem.getBoundingClientRect().height - margin.top - margin.bottom;
 
-        var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
-            y = d3.scaleLinear().rangeRound([height, 0]);
+    var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+        y = d3.scaleLinear().rangeRound([height, 0]);
 
-        var g = svg.append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var g = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        d3.json("/api/trends", function(error, result) {
-          if (error) throw error;
-          var data = result.data;
+    d3.json("/api/trends", function(error, result) {
+      if (error) throw error;
+      var data = result.data;
 
-          x.domain(data.map(function(d) { return d.day; }));
-          y.domain([0, d3.max(data, function(d) { return d.consumption; })]);
+      x.domain(data.map(function(d) { return d.day; }));
+      y.domain([0, d3.max(data, function(d) { return d.consumption; })]);
 
-          g.append("g")
-              .attr("class", "axis axis--x")
-              .attr("transform", "translate(0," + height + ")")
-              .call(d3.axisBottom(x));
+      g.append("g")
+          .attr("class", "axis axis--x")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x));
 
-          g.append("g")
-              .attr("class", "axis axis--y")
-              .call(d3.axisLeft(y).ticks(10, ",d"))
-            .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("y", 6)
-              .attr("dy", "0.71em")
-              .attr("text-anchor", "end")
-              .text("Consumption");
+      g.append("g")
+          .attr("class", "axis axis--y")
+          .call(d3.axisLeft(y).ticks(10, ",d"))
+        .append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 6)
+          .attr("dy", "0.71em")
+          .attr("text-anchor", "end")
+          .text("Consumption");
 
-          g.selectAll(".bar")
-            .data(data)
-            .enter().append("rect")
-              .attr("class", "bar")
-              .attr("x", function(d) { return x(d.day); })
-              .attr("y", function(d) { return y(d.consumption); })
-              .attr("width", x.bandwidth())
-              .attr("height", function(d) { return height - y(d.consumption); });
-          });
+      g.selectAll(".bar")
+        .data(data)
+        .enter().append("rect")
+          .attr("class", "bar")
+          .attr("x", function(d) { return x(d.day); })
+          .attr("y", function(d) { return y(d.consumption); })
+          .attr("width", x.bandwidth())
+          .attr("height", function(d) { return height - y(d.consumption); });
+      });

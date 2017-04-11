@@ -3,242 +3,240 @@ extends ./layout
 append header
  script(src="https://d3js.org/d3.v3.min.js")
  style.
-  .bar {
-    fill: steelblue;
+  .row {
+    overflow-y:scroll;
   }
-  .bar:hover {
-    fill: brown;
-  }
-  .axis--x path {
-    display: none;
+  svg {
+    width: 100%;
+    min-width: 800px;
   }
 
 block content
   .row
     .col-md-12
-      svg(style="width:100%; min-width:900px", height=500)#chart
+      svg(height=500)#chart
 
-      script.
-        var chartElem = document.getElementById('chart'),
-        margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width  = chartElem.getBoundingClientRect().width - margin.left - margin.right,
-        height = chartElem.getBoundingClientRect().height - margin.top - margin.bottom;
+  script.
+    var chartElem = document.getElementById('chart'),
+    margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width  = chartElem.getBoundingClientRect().width - margin.left - margin.right,
+    height = chartElem.getBoundingClientRect().height - margin.top - margin.bottom;
 
-        var margin = {top: 10, right: 10, bottom: 10, left: 15};
-        var padding = 3;
-        var xLabelHeight = 30;
-        var yLabelWidth = 80;
-        var borderWidth = 3;
-        var duration = 500;
+    var margin = {top: 10, right: 10, bottom: 10, left: 15};
+    var padding = 3;
+    var xLabelHeight = 30;
+    var yLabelWidth = 80;
+    var borderWidth = 3;
+    var duration = 500;
 
-        var chart = d3.select('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+    var chart = d3.select('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-        var border = chart.append('rect')
-            .attr('x', yLabelWidth)
-            .attr('y', xLabelHeight)
+    var border = chart.append('rect')
+        .attr('x', yLabelWidth)
+        .attr('y', xLabelHeight)
+        .style('fill-opacity', 0)
+        .style('stroke', '#000')
+        .style('stroke-width', borderWidth)
+        .style('shape-rendering', 'crispEdges');
+
+
+    var labelsX = ['12a','1a','2a','3a','4a','5a','6a','7a','8a','9a','10a','11a','12p','1p','2p','3p','4p','5p','6p','7p','8p','9p','10p','11p'];
+    d3.json('/api/punchcard', function(response) {
+
+        var data = response.data;
+
+        var allValues = Array.prototype.concat.apply([], data.map(function(d) { return d.values }));
+        var maxWidth = d3.max(data.map(function(d) { return d.values.length }));
+        var maxR = d3.min([(width - yLabelWidth) / maxWidth, (height - xLabelHeight) / data.length]) / 2;
+
+        var r = function(d) {
+          if (d === 0) return 0;
+
+          f = d3.scale.sqrt()
+              .domain([d3.min(allValues), d3.max(allValues)])
+              .rangeRound([2, maxR - padding])
+
+          return f(d)
+        };
+
+        var c = d3.scale.linear()
+            .domain([d3.min(allValues), d3.max(allValues)])
+            .rangeRound([255 * 0.8, 0]);
+
+        var rows = chart.selectAll('.row')
+            .data(data, function(d){ return d.label });
+
+        rows.enter().append('g')
+            .attr('class', 'row');
+
+        rows.exit()
+            .transition()
+            .duration(duration)
             .style('fill-opacity', 0)
-            .style('stroke', '#000')
-            .style('stroke-width', borderWidth)
-            .style('shape-rendering', 'crispEdges');
+            .remove()
 
+        rows.transition()
+            .duration(duration)
+            .attr('transform', function(d, i){ return 'translate(' + yLabelWidth + ',' + (maxR * i * 2 + maxR + xLabelHeight) + ')' })
 
-        var labelsX = ['12a','1a','2a','3a','4a','5a','6a','7a','8a','9a','10a','11a','12p','1p','2p','3p','4p','5p','6p','7p','8p','9p','10p','11p'];
-        d3.json('/api/punchcard', function(response) {
+        var dots = rows.selectAll('circle')
+            .data(function(d){ return d.values })
 
-            var data = response.data;
+        dots.enter().append('circle')
+            .attr('cy', 0)
+            .attr('r', 0)
+            .style('fill', '#ffffff')
+            .text(function(d){ return d })
 
-            var allValues = Array.prototype.concat.apply([], data.map(function(d) { return d.values }));
-            var maxWidth = d3.max(data.map(function(d) { return d.values.length }));
-            var maxR = d3.min([(width - yLabelWidth) / maxWidth, (height - xLabelHeight) / data.length]) / 2;
+        dots.exit()
+            .transition()
+            .duration(duration)
+            .attr('r', 0)
+            .remove()
 
-            var r = function(d) {
-              if (d === 0) return 0;
+        dots.transition()
+            .duration(duration)
+            .attr('r', function(d){ return r(d) })
+            .attr('cx', function(d, i){ return i * maxR * 2 + maxR })
+            .style('fill', function(d){ return 'rgb(' + c(d) + ',' + c(d) + ',' + c(d) + ')' })
 
-              f = d3.scale.sqrt()
-                  .domain([d3.min(allValues), d3.max(allValues)])
-                  .rangeRound([2, maxR - padding])
+        var dotLabels = rows.selectAll('.dot-label')
+            .data(function(d){ return d.values });
 
-              return f(d)
-            };
+        var dotLabelEnter = dotLabels.enter().append('g')
+            .attr('class', 'dot-label')
+            .on('mouseover', function(d){
+                var selection = d3.select(this)
+                selection.select('rect').transition().duration(100).style('opacity', 1)
+                selection.select("text").transition().duration(100).style('opacity', 1)
+            })
+            .on('mouseout', function(d){
+                var selection = d3.select(this)
+                selection.select('rect').transition().style('opacity', 0)
+                selection.select("text").transition().style('opacity', 0)
+            })
 
-            var c = d3.scale.linear()
-                .domain([d3.min(allValues), d3.max(allValues)])
-                .rangeRound([255 * 0.8, 0]);
+        dotLabelEnter.append('rect')
+            .style('fill', '#000000')
+            .style('opacity', 0)
 
-            var rows = chart.selectAll('.row')
-                .data(data, function(d){ return d.label });
+        dotLabelEnter.append('text')
+            .style('text-anchor', 'middle')
+            .style('fill', '#ffffff')
+            .style('opacity', 0)
 
-            rows.enter().append('g')
-                .attr('class', 'row');
+        dotLabels.exit().remove()
 
-            rows.exit()
-                .transition()
-                .duration(duration)
-                .style('fill-opacity', 0)
-                .remove()
-
-            rows.transition()
-                .duration(duration)
-                .attr('transform', function(d, i){ return 'translate(' + yLabelWidth + ',' + (maxR * i * 2 + maxR + xLabelHeight) + ')' })
-
-            var dots = rows.selectAll('circle')
-                .data(function(d){ return d.values })
-
-            dots.enter().append('circle')
-                .attr('cy', 0)
-                .attr('r', 0)
-                .style('fill', '#ffffff')
+        dotLabels
+            .attr('transform', function(d, i){ return 'translate(' + (i * maxR * 2) + ',' + (-maxR) + ')' })
+            .select('text')
                 .text(function(d){ return d })
+                .attr('y', maxR + 4)
+                .attr('x', maxR)
 
-            dots.exit()
-                .transition()
-                .duration(duration)
-                .attr('r', 0)
-                .remove()
+        dotLabels
+            .select('rect')
+            .attr('width', maxR * 2)
+            .attr('height', maxR * 2)
 
-            dots.transition()
-                .duration(duration)
-                .attr('r', function(d){ return r(d) })
-                .attr('cx', function(d, i){ return i * maxR * 2 + maxR })
-                .style('fill', function(d){ return 'rgb(' + c(d) + ',' + c(d) + ',' + c(d) + ')' })
+        var xLabels = chart.selectAll('.xLabel')
+            .data(labelsX)
 
-            var dotLabels = rows.selectAll('.dot-label')
-                .data(function(d){ return d.values });
+        xLabels.enter().append('text')
+            .attr('y', xLabelHeight)
+            .attr('transform', 'translate(0,-6)')
+            .attr('class', 'xLabel')
+            .style('text-anchor', 'middle')
+            .style('fill-opacity', 0)
 
-            var dotLabelEnter = dotLabels.enter().append('g')
-                .attr('class', 'dot-label')
-                .on('mouseover', function(d){
-                    var selection = d3.select(this)
-                    selection.select('rect').transition().duration(100).style('opacity', 1)
-                    selection.select("text").transition().duration(100).style('opacity', 1)
-                })
-                .on('mouseout', function(d){
-                    var selection = d3.select(this)
-                    selection.select('rect').transition().style('opacity', 0)
-                    selection.select("text").transition().style('opacity', 0)
-                })
+        xLabels.exit()
+            .transition()
+            .duration(duration)
+            .style('fill-opacity', 0)
+            .remove()
 
-            dotLabelEnter.append('rect')
-                .style('fill', '#000000')
-                .style('opacity', 0)
+        xLabels.transition()
+            .text(function (d) { return d })
+            .duration(duration)
+            .attr('x', function(d, i){ return maxR * i * 2 + maxR + yLabelWidth })
+            .style('fill-opacity', 1)
 
-            dotLabelEnter.append('text')
-                .style('text-anchor', 'middle')
-                .style('fill', '#ffffff')
-                .style('opacity', 0)
+        var yLabels = chart.selectAll('.yLabel')
+            .data(data, function(d){ return d.label })
 
-            dotLabels.exit().remove()
+        yLabels.enter().append('text')
+            .text(function (d) { return d.label })
+            .attr('x', yLabelWidth)
+            .attr('class', 'yLabel')
+            .style('text-anchor', 'end')
+            .style('fill-opacity', 0)
 
-            dotLabels
-                .attr('transform', function(d, i){ return 'translate(' + (i * maxR * 2) + ',' + (-maxR) + ')' })
-                .select('text')
-                    .text(function(d){ return d })
-                    .attr('y', maxR + 4)
-                    .attr('x', maxR)
+        yLabels.exit()
+            .transition()
+            .duration(duration)
+            .style('fill-opacity', 0)
+            .remove()
 
-            dotLabels
-                .select('rect')
-                .attr('width', maxR * 2)
-                .attr('height', maxR * 2)
+        yLabels.transition()
+            .duration(duration)
+            .attr('y', function(d, i){ return maxR * i * 2 + maxR + xLabelHeight })
+            .attr('transform', 'translate(-6,' + maxR / 2.5 + ')')
+            .style('fill-opacity', 1)
 
-            var xLabels = chart.selectAll('.xLabel')
-                .data(labelsX)
+        var vert = chart.selectAll('.vert')
+            .data(labelsX)
 
-            xLabels.enter().append('text')
-                .attr('y', xLabelHeight)
-                .attr('transform', 'translate(0,-6)')
-                .attr('class', 'xLabel')
-                .style('text-anchor', 'middle')
-                .style('fill-opacity', 0)
+        vert.enter().append('line')
+            .attr('class', 'vert')
+            .attr('y1', xLabelHeight + borderWidth / 2)
+            .attr('stroke', '#888')
+            .attr('stroke-width', 1)
+            .style('shape-rendering', 'crispEdges')
+            .style('stroke-opacity', 0)
 
-            xLabels.exit()
-                .transition()
-                .duration(duration)
-                .style('fill-opacity', 0)
-                .remove()
+        vert.exit()
+            .transition()
+            .duration(duration)
+            .style('stroke-opacity', 0)
+            .remove()
 
-            xLabels.transition()
-                .text(function (d) { return d })
-                .duration(duration)
-                .attr('x', function(d, i){ return maxR * i * 2 + maxR + yLabelWidth })
-                .style('fill-opacity', 1)
+        vert.transition()
+            .duration(duration)
+            .attr('x1', function(d, i){ return maxR * i * 2 + yLabelWidth })
+            .attr('x2', function(d, i){ return maxR * i * 2 + yLabelWidth })
+            .attr('y2', maxR * 2 * data.length + xLabelHeight - borderWidth / 2)
+            .style('stroke-opacity', function(d, i){ return i ? 1 : 0 })
 
-            var yLabels = chart.selectAll('.yLabel')
-                .data(data, function(d){ return d.label })
+        var horiz = chart.selectAll('.horiz').
+            data(data, function(d){ return d.label })
 
-            yLabels.enter().append('text')
-                .text(function (d) { return d.label })
-                .attr('x', yLabelWidth)
-                .attr('class', 'yLabel')
-                .style('text-anchor', 'end')
-                .style('fill-opacity', 0)
+        horiz.enter().append('line')
+            .attr('class', 'horiz')
+            .attr('x1', yLabelWidth + borderWidth / 2)
+            .attr('stroke', '#888')
+            .attr('stroke-width', 1)
+            .style('shape-rendering', 'crispEdges')
+            .style('stroke-opacity', 0)
 
-            yLabels.exit()
-                .transition()
-                .duration(duration)
-                .style('fill-opacity', 0)
-                .remove()
+        horiz.exit()
+            .transition()
+            .duration(duration)
+            .style('stroke-opacity', 0)
+            .remove()
 
-            yLabels.transition()
-                .duration(duration)
-                .attr('y', function(d, i){ return maxR * i * 2 + maxR + xLabelHeight })
-                .attr('transform', 'translate(-6,' + maxR / 2.5 + ')')
-                .style('fill-opacity', 1)
+        horiz.transition()
+            .duration(duration)
+            .attr('x2', maxR * 2 * labelsX.length + yLabelWidth - borderWidth / 2)
+            .attr('y1', function(d, i){ return i * maxR * 2 + xLabelHeight })
+            .attr('y2', function(d, i){ return i * maxR * 2 + xLabelHeight })
+            .style('stroke-opacity', function(d, i){ return i ? 1 : 0 })
 
-            var vert = chart.selectAll('.vert')
-                .data(labelsX)
-
-            vert.enter().append('line')
-                .attr('class', 'vert')
-                .attr('y1', xLabelHeight + borderWidth / 2)
-                .attr('stroke', '#888')
-                .attr('stroke-width', 1)
-                .style('shape-rendering', 'crispEdges')
-                .style('stroke-opacity', 0)
-
-            vert.exit()
-                .transition()
-                .duration(duration)
-                .style('stroke-opacity', 0)
-                .remove()
-
-            vert.transition()
-                .duration(duration)
-                .attr('x1', function(d, i){ return maxR * i * 2 + yLabelWidth })
-                .attr('x2', function(d, i){ return maxR * i * 2 + yLabelWidth })
-                .attr('y2', maxR * 2 * data.length + xLabelHeight - borderWidth / 2)
-                .style('stroke-opacity', function(d, i){ return i ? 1 : 0 })
-
-            var horiz = chart.selectAll('.horiz').
-                data(data, function(d){ return d.label })
-
-            horiz.enter().append('line')
-                .attr('class', 'horiz')
-                .attr('x1', yLabelWidth + borderWidth / 2)
-                .attr('stroke', '#888')
-                .attr('stroke-width', 1)
-                .style('shape-rendering', 'crispEdges')
-                .style('stroke-opacity', 0)
-
-            horiz.exit()
-                .transition()
-                .duration(duration)
-                .style('stroke-opacity', 0)
-                .remove()
-
-            horiz.transition()
-                .duration(duration)
-                .attr('x2', maxR * 2 * labelsX.length + yLabelWidth - borderWidth / 2)
-                .attr('y1', function(d, i){ return i * maxR * 2 + xLabelHeight })
-                .attr('y2', function(d, i){ return i * maxR * 2 + xLabelHeight })
-                .style('stroke-opacity', function(d, i){ return i ? 1 : 0 })
-
-            border.transition()
-                .duration(duration)
-                .attr('width', maxR * 2 * labelsX.length)
-                .attr('height', maxR * 2 * data.length)
-        });
+        border.transition()
+            .duration(duration)
+            .attr('width', maxR * 2 * labelsX.length)
+            .attr('height', maxR * 2 * data.length)
+    });
