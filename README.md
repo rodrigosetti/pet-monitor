@@ -5,7 +5,7 @@ automatically.
 
 ![picture](images/pict1.jpg?raw=true "Picture")
 
-![Screenshot](images/screenshot-1.png?raw=true "Screenshot 1") ![Screenshot](images/screenshot-2.png?raw=true "Screenshot 2")
+![Screenshot](images/screenshot-1.jpg?raw=true "Screenshot 1") ![Screenshot](images/screenshot-2.jpg?raw=true "Screenshot 2") ![Screenshot](images/screenshot-3.jpg?raw=true "Screenshot 3")
 
 Why
 ---
