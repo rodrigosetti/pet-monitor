@@ -2,5 +2,6 @@
 
 module.exports = {
     main : require('./main'),
-    trends: require('./trends')
+    trends: require('./trends'),
+    punchcard: require('./punchcard')
 };

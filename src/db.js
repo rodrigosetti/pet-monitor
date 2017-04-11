@@ -18,13 +18,9 @@ function atExit(exitCode) {
 process.on('exit', atExit);
 process.on('SIGEXIT', atExit);
 
-const DAY_SECONDS = 24 * 60 * 60;
-const DAY_MILLIS = DAY_SECONDS * 1000;
-const WEEKS_IN_YEAR = 52;
-const WEEK_SECONDS = 7 * DAY_SECONDS;
-
 const MILLIS_IN_MINUTES = 60 * 1000;
 const MILLIS_IN_DAYS = 24 * 60 * MILLIS_IN_MINUTES;
+const ZERO_24 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 function computeDays(date) {
     return Math.floor((date.getTime() - (date.getTimezoneOffset() * MILLIS_IN_MINUTES)) / MILLIS_IN_DAYS);
@@ -81,32 +77,81 @@ module.exports = {
     },
 
     getPunchCard: (callback) => {
-        const startOfToday = new Date();
-        startOfToday.setHours(0);
-        startOfToday.setMinutes(0);
-        startOfToday.setSeconds(0);
-        startOfToday.setMilliseconds(0);
+        // for each week, starting now and back 52 (or until there's no results):
+        //    calculate the sum(delta) group by day and hour, add to a list of (weekday, hour, sum(delta))
+        // average all sum(delta)
+        const date = new Date();
+        const today = computeDays(date);
+        const startOfWeekDay = today - date.getDay();
+        const weeks = [];
 
-        const startOfThisWeek = new Date(startOfToday.getTime() - (DAY_MILLIS * startOfToday.getDay())).getTime() / 1000;
+        function queryWeek(week) {
+            // both $since and $to are sundays
+            const $since = startOfWeekDay - ((week+1) * 7);
+            const $to = startOfWeekDay - (week * 7);
+            db.all("SELECT sum(delta) AS dsum, days, hours FROM deltas WHERE delta < 0 AND days >= $since AND days < $to GROUP BY days, hours",
+                   {
+                       $since, $to
+                   },
+                   (err, rows) => {
+                       if (err) {
+                           callback(err);
+                       } else {
+                           const weekDayToHourValues = {};
+                           rows.forEach(r => {
+                               const weekday = r.days - $since;
+                               if (!weekDayToHourValues[weekday]) {
+                                   weekDayToHourValues[weekday] = {};
+                               }
+                               weekDayToHourValues[weekday][r.hours] = -r.dsum;
+                           });
 
-        const stat = db.prepare("SELECT SUM(delta) AS dsum, weekday, hour FROM deltas WHERE delta < 0 AND timestamp >= $since AND timestamp <= $until GROUP BY weekday, hour");
+                           // normalize and add missing values
+                           Object.keys(weekDayToHourValues).forEach(weekday => {
+                               const o = weekDayToHourValues[weekday];
+                               const values = [];
+                               for (let h=0; h < 24; h++) {
+                                   values.push(o[h] || 0);
+                               }
+                               weekDayToHourValues[weekday] = values;
+                           });
 
-        const weekData = [];
+                           weeks.push(weekDayToHourValues);
 
-        function processWeek(week) {
-            const $since = startOfThisWeek - ((week + 1) * WEEK_SECONDS);
-            const $until = startOfThisWeek - (week * WEEK_SECONDS);
+                           if (rows.length && week < 52) {
+                               queryWeek(week + 1);
+                           } else {
+                               // done: compute average
+                               const result = {
+                                   0 : ZERO_24.slice(),
+                                   1 : ZERO_24.slice(),
+                                   2 : ZERO_24.slice(),
+                                   3 : ZERO_24.slice(),
+                                   4 : ZERO_24.slice(),
+                                   5 : ZERO_24.slice(),
+                                   6 : ZERO_24.slice()
+                               };
+                               weeks.forEach(w => {
+                                   Object.keys(w).forEach(weekday => {
+                                       for (let h=0; h < 24; h++) {
+                                           result[weekday][h] += w[weekday][h];
+                                       }
+                                   });
+                               });
+                               // average
+                               const N = weeks.length;
+                               Object.keys(result).forEach(weekday => {
+                                   for (let h=0; h < 24; h++) {
+                                       result[weekday][h] /= N;
+                                   }
+                               });
 
-            stat.get({ $since, $until }, (err, row) => {
-
-                for (let $weekday=0; $weekday < 7; $weekday++) {
-                    for (let $hour=0; $hour < 24; $hour++) {
-                        // TODO
-                    }
-                }
-            });
+                               callback(null, result);
+                           }
+                       }
+                   });
         }
 
-        processWeek(0);
+        queryWeek(0);
     }
 };

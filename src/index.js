@@ -29,6 +29,9 @@ if (config.get('server.enabled')) {
     app.get('/trends', controllers.trends.page);
     app.get('/api/trends', controllers.trends.api);
 
+    app.get('/punchcard', controllers.punchcard.page);
+    app.get('/api/punchcard', controllers.punchcard.api);
+
     app.listen(port, () => {
         winston.info(`Server running at port ${port}`);
     });
