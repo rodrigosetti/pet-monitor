@@ -32,6 +32,7 @@ module.exports.api = (req, res) => {
 
 module.exports.page = (req, res) => {
     res.render('trends', {
+        page: "trends",
         weightNow: serial.getLastWeight(),
         temperature : serial.getLastTemperature(),
         days: req.query.days || 7

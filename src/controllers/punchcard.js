@@ -41,6 +41,7 @@ module.exports.api = (req, res) => {
 
 module.exports.page = (req, res) => {
     res.render('punchcard', {
+        page: "punchcard",
         weightNow: serial.getLastWeight(),
         temperature : serial.getLastTemperature()
     });

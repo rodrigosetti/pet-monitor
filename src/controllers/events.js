@@ -33,6 +33,7 @@ module.exports = (req, res) => {
                 });
 
                 res.render('events', {
+                    page: "events",
                     weightNow: serial.getLastWeight(),
                     temperature : serial.getLastTemperature(),
                     query,
