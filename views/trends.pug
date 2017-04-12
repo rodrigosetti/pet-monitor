@@ -21,9 +21,9 @@ block content
   .row
     .col-md-12
       ul.nav.nav-pills
-         li(class=days==7 ? "active" : ""): a(href="/trends?days=7") week
-         li(class=days==30 ? "active" : ""): a(href="/trends?days=30") month
-         li(class=days==365 ? "active" : ""): a(href="/trends?days=365") year
+         li(class=days==7 ? "active" : undefined): a(href="/trends?days=7") week
+         li(class=days==30 ? "active" : undefined): a(href="/trends?days=30") month
+         li(class=days==365 ? "active" : undefined): a(href="/trends?days=365") year
       svg#chart
 
   script.

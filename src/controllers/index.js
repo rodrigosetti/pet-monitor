@@ -1,7 +1,7 @@
 /* jshint node:true, esversion:6 */
 
 module.exports = {
-    main : require('./main'),
+    events : require('./events'),
     trends: require('./trends'),
     punchcard: require('./punchcard')
 };

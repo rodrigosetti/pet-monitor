@@ -32,7 +32,7 @@ module.exports = (req, res) => {
                     r.timestampStr = dateformat(r.timestamp * 1000, "dayMinute");
                 });
 
-                res.render('index', {
+                res.render('events', {
                     weightNow: serial.getLastWeight(),
                     temperature : serial.getLastTemperature(),
                     query,

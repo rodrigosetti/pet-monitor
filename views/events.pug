@@ -1,7 +1,7 @@
 extends ./layout
 
 block content
-  form(method='GET', action='/').form-inline
+  form(method='GET', action='/events').form-inline
     .form-group
        input(type="text", name="q", id="q", value=query).form-control
        button(type="submit").btn.btn-default OK
@@ -20,7 +20,7 @@ block content
 
   .list-group
       each row in rows
-        a(href='#').list-group-item
+        .list-group-item(class=row.delta>0 ? "list-group-item-info" : undefined)
             - let what = row.delta < 0 ? 'consumed' : 'refilled';
             - let quantity = Math.abs(row.delta);
             h4.list-group-item-heading #{what} #{quantity} g

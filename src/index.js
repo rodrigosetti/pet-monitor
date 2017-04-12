@@ -19,18 +19,16 @@ if (config.get('server.enabled')) {
     app.set('view engine', 'pug');
     app.use(morgan(config.get('log.format')));
 
-    /*
-     * "q" can have the following formats:
-     * N => since N hour ago
-     * N-M => between N and M hours ago
-     */
-    app.get('/', controllers.main);
+    app.get('/events', controllers.events);
 
     app.get('/trends', controllers.trends.page);
     app.get('/api/trends', controllers.trends.api);
 
     app.get('/punchcard', controllers.punchcard.page);
     app.get('/api/punchcard', controllers.punchcard.api);
+
+    // default is events
+    app.get('/', controllers.events);
 
     app.listen(port, () => {
         winston.info(`Server running at port ${port}`);
