@@ -14,12 +14,17 @@ append header
   }
   svg {
     width: 100%;
+    height: 500px;
   }
 
 block content
   .row
     .col-md-12
-      svg(height=500)#chart
+      ul.nav.nav-pills
+         li(class=days==7 ? "active" : ""): a(href="/trends?days=7") week
+         li(class=days==30 ? "active" : ""): a(href="/trends?days=30") month
+         li(class=days==365 ? "active" : ""): a(href="/trends?days=365") year
+      svg#chart
 
   script.
     var chartElem = document.getElementById('chart'),
@@ -34,7 +39,7 @@ block content
     var g = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    d3.json("/api/trends", function(error, result) {
+    d3.json("/api/trends?days=#{days}", function(error, result) {
       if (error) throw error;
       var data = result.data;
 
@@ -43,8 +48,8 @@ block content
 
       g.append("g")
           .attr("class", "axis axis--x")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x));
+          .call(d3.axisBottom(x))
+          .attr("transform", "translate(0," + height + ")");
 
       g.append("g")
           .attr("class", "axis axis--y")
