@@ -5,7 +5,17 @@ const dateformat = require('dateformat');
 const db = require('../db');
 const serial = require('../serial');
 
-const WEEKNAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+function formatHour(h) {
+    if (h === 0) {
+        return "12 am";
+    } else if (h < 12) {
+        return `${h} am`;
+    } else if (h === 12) {
+        return "12 pm";
+    } else {
+        return `${h-12} pm`;
+    }
+}
 
 module.exports.api = (req, res) => {
     db.getPunchCard((err, punchcard) => {
@@ -15,10 +25,10 @@ module.exports.api = (req, res) => {
         } else {
             const presentation = [];
 
-            for (let w=0; w<7; w++) {
+            for (let h=0; h<24; h++) {
                 presentation.push({
-                    label: WEEKNAMES[w],
-                    values: punchcard[w].map(v => Math.floor(v * 100) / 100)
+                    label: formatHour(h),
+                    values: [0,1,2,3,4,5,6].map(w => Math.round(punchcard[w][h]*100)/100)
                 });
             }
 
