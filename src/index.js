@@ -19,6 +19,8 @@ if (config.get('server.enabled')) {
     app.set('view engine', 'pug');
     app.use(morgan(config.get('log.format')));
 
+    app.use(express.static('public'));
+
     app.get('/events', controllers.events);
 
     app.get('/trends', controllers.trends.page);
