@@ -3,9 +3,10 @@
 const winston = require('winston');
 const config = require('config');
 const path = require('path');
-let sqlite3 = require('sqlite3');
+const bcrypt = require('bcrypt');
+let sqlite3 = require('sqlite3');
 
-const db = new sqlite3.Database(path.join(__dirname, '..', 'data.db'));
+const db = new sqlite3.Database(path.join(__dirname, '..', 'data.db'));
 
 if (config.get('log.cli_mode')) {
     sqlite3 = sqlite3.verbose();
@@ -31,7 +32,39 @@ function daysToTime(days) {
     return new Date((days * MILLIS_IN_DAYS) + (date.getTimezoneOffset() * MILLIS_IN_MINUTES));
 }
 
+function findUserByUsername($username, callback) {
+    db.get("SELECT * FROM users WHERE username=$username", { $username }, callback);
+}
+
 module.exports = {
+    findUserById: ($id, callback) => {
+        db.get("SELECT * FROM users WHERE id=$id", { $id }, callback);
+    },
+
+    findUserByUsername,
+
+    registerUser: ($username, password, callback) => {
+        findUserByUsername($username, (err, user) => {
+            if (err) {
+                callback(err, false);
+            } else if (user) {
+                callback(null, false);
+            } else {
+                bcrypt.hash(password, 10, (err, $password_hash) => {
+                    if (err) {
+                        callback(err, false);
+                    } else {
+                        db.run("INSERT INTO users (username, password_hash) VALUES ($username, $password_hash)",
+                            { $username, $password_hash },
+                            (err) => {
+                                callback(err, true);
+                            });
+                    }
+                });
+            }
+        });
+    },
+
     insert: (date, $delta, $weight, $temperature) => {
         const $timestamp = date.getTime() / 1000; // in seconds
         const $hours = date.getHours();

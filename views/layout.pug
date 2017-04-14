@@ -32,12 +32,24 @@ html(lang="en")
         nav.navbar.navbar-inverse.navbar-static-top
           .container-fluid
             .navbar-header
-              p.navbar-text #{weightNow} g | #{temperature}° C
+              p.navbar-text #{ctx.weightNow} g | #{ctx.temperature}° C
 
             ul.nav.navbar-nav
-              li(class=page==="events" && "active"): a(href="/events")  Events
-              li(class=page==="trends" && "active"): a(href="/trends") Trends
-              li(class=page==="punchcard" && "active"): a(href="/punchcard") Punch Card
+              li(class=ctx.page==="/events" && "active"): a(href="/events")  Events
+              li(class=ctx.page==="/trends" && "active"): a(href="/trends") Trends
+              li(class=ctx.page==="/punchcard" && "active"): a(href="/punchcard") Punch Card
+
+            ul.nav.navbar-nav.navbar-right
+              if ctx.user
+                li: a(href="/logout", display="inline") logout #{ctx.user.username}
+              else
+                li(class=ctx.page==="/login" && "active"): a(href="/login") login
+                li(class=ctx.page==="/signup" && "active"): a(href="/signup") signup
 
         .container-fluid
+          each msg in ctx.messages("success")
+            .alert.alert-success(role="alert")= msg
+          each msg in ctx.messages("error")
+            .alert.alert-danger(role="alert")= msg
+
           block content

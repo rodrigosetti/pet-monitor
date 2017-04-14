@@ -3,7 +3,6 @@
 const winston = require('winston');
 const dateformat = require('dateformat');
 const db = require('../db');
-const serial = require('../serial');
 
 const DAY_SECONDS = 24 * 60 * 60;
 
@@ -32,9 +31,7 @@ module.exports.api = (req, res) => {
 
 module.exports.page = (req, res) => {
     res.render('trends', {
-        page: "trends",
-        weightNow: serial.getLastWeight(),
-        temperature : serial.getLastTemperature(),
+        ctx : req.renderContext,
         days: req.query.days || 7
     });
 };

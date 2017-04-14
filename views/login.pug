@@ -1,0 +1,11 @@
+extends ./layout
+
+block content
+  form(method='POST', action='/login')
+    .form-group
+      label(for="username") Username
+      input(type="text", id="username", name="username", placeholder="username").form-control
+    .form-group
+      label(for="password") Password
+      input(type="password", id="password", name="password", placeholder="password").form-control
+    button(type="submit").btn.btn-default Log In

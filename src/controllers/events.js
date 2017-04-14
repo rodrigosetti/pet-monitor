@@ -2,7 +2,6 @@
 
 const dateformat = require('dateformat');
 const winston = require('winston');
-const serial = require('../serial');
 const db = require('../db');
 
 dateformat.masks.dayMinute = "m/d/yyyy h:MM tt";
@@ -33,9 +32,7 @@ module.exports = (req, res) => {
                 });
 
                 res.render('events', {
-                    page: "events",
-                    weightNow: serial.getLastWeight(),
-                    temperature : serial.getLastTemperature(),
+                    ctx : req.renderContext,
                     query,
                     rows,
                     totalConsumed,

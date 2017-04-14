@@ -3,7 +3,6 @@
 const winston = require('winston');
 const dateformat = require('dateformat');
 const db = require('../db');
-const serial = require('../serial');
 
 function formatHour(h) {
     if (h === 0) {
@@ -41,8 +40,6 @@ module.exports.api = (req, res) => {
 
 module.exports.page = (req, res) => {
     res.render('punchcard', {
-        page: "punchcard",
-        weightNow: serial.getLastWeight(),
-        temperature : serial.getLastTemperature()
+        ctx : req.renderContext
     });
 };
