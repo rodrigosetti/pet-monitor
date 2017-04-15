@@ -25,26 +25,34 @@ html(lang="en")
         meta(name="theme-color" content="#ffffff")
 
         title Smart Pet Food Tracker
-        link(rel="stylesheet",href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css")
+        link(rel="stylesheet",
+             href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css",
+             integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u",
+             crossorigin="anonymous")
         block header
     body
 
-        nav.navbar.navbar-inverse.navbar-static-top
+        nav.navbar.navbar-default.navbar-inverse(role="navigation")
           .container-fluid
             .navbar-header
-              p.navbar-text #{ctx.weightNow} g | #{ctx.temperature}° C
+              button.navbar-toggle(data-toggle="collapse", data-target="#navigationbar")
+                span.sr-only Toggle navigation
+                span.icon-bar
+                span.icon-bar
+                span.icon-bar
+              a.navbar-brand(href="/") #{ctx.weightNow} g | #{ctx.temperature}° C
+            #navigationbar.collapse.navbar-collapse
+              ul.nav.navbar-nav
+                li(class=ctx.page==="/events" && "active"): a(href="/events")  Events
+                li(class=ctx.page==="/trends" && "active"): a(href="/trends") Trends
+                li(class=ctx.page==="/punchcard" && "active"): a(href="/punchcard") Punch Card
 
-            ul.nav.navbar-nav
-              li(class=ctx.page==="/events" && "active"): a(href="/events")  Events
-              li(class=ctx.page==="/trends" && "active"): a(href="/trends") Trends
-              li(class=ctx.page==="/punchcard" && "active"): a(href="/punchcard") Punch Card
-
-            ul.nav.navbar-nav.navbar-right
-              if ctx.user
-                li: a(href="/logout", display="inline") logout #{ctx.user.username}
-              else
-                li(class=ctx.page==="/login" && "active"): a(href="/login") login
-                li(class=ctx.page==="/signup" && "active"): a(href="/signup") signup
+              ul.nav.navbar-nav.navbar-right
+                if ctx.user
+                  li: a(href="/logout", display="inline") logout #{ctx.user.username}
+                else
+                  li(class=ctx.page==="/login" && "active"): a(href="/login") login
+                  li(class=ctx.page==="/signup" && "active"): a(href="/signup") signup
 
         .container-fluid
           each msg in ctx.messages("success")
@@ -53,3 +61,8 @@ html(lang="en")
             .alert.alert-danger(role="alert")= msg
 
           block content
+
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
+        script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js",
+                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa",
+                crossorigin="anonymous")
