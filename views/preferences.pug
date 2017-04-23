@@ -1,0 +1,25 @@
+
+extends ./layout
+
+block content
+  form(method='POST', action='/preferences')
+
+    .form-group
+      label(for="phone_number") Phone Number
+      input(type="text", id="phone_number", name="phone_number", value=ctx.user.phone_number).form-control
+
+    .checkbox
+      label
+        input(type="checkbox", name="notify_consumption", checked=!!ctx.user.notify_consumption)/ Notify consumption
+    .checkbox
+      label
+        input(type="checkbox", name="notify_refilling", checked=!!ctx.user.notify_refilling)/ Notify refilling
+    .checkbox
+      label
+        input(type="checkbox", name="notify_empty", checked=!!ctx.user.notify_empty)/ Notify when empty
+
+    .form-group
+      label(for="notify_inactivity_hours") Notify after inactivity period (hours, 0 is disabled)
+      input(type="number", min=0, id="notify_inactivity_hours", name="notify_inactivity_hours", value=ctx.user.notify_inactivity_hours).form-control
+
+    input(type="submit", value="Update").btn

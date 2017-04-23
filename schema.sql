@@ -21,8 +21,8 @@ CREATE TABLE users (
 
   /* notification preferences */
   phone_number TEXT,
-  notification_delta_min_threshold INTEGER,
-  notification_delta_max_threshold INTEGER,
-  notification_weight_min_threshold INTEGER,
-  notification_inactive_hours_threshold INTEGER
+  notify_consumption BOOLEAN,
+  notify_refilling BOOLEAN,
+  notify_empty BOOLEAN,
+  notify_inactivity_hours INTEGER
 );

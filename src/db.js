@@ -43,6 +43,13 @@ module.exports = {
 
     findUserByUsername,
 
+    getUsers : (callback, complete) => {
+        db.each(
+            "SELECT * FROM users WHERE phone_number IS NOT NULL AND phone_number != '' AND (notify_consumption OR notify_refilling OR notify_empty OR notify_inactivity_hours > 0)",
+            callback,
+            complete);
+    },
+
     registerUser: ($username, password, callback) => {
         findUserByUsername($username, (err, user) => {
             if (err) {
@@ -65,7 +72,29 @@ module.exports = {
         });
     },
 
-    insert: (date, $delta, $weight, $temperature) => {
+    saveUserPreferences: ($userId, data, callback) => {
+        winston.debug("DB:", {
+            $userId,
+            $phone_number: data.phone_number || null,
+            $notify_consumption: !!data.notify_consumption,
+            $notify_refilling: !!data.notify_refilling,
+            $notify_empty: !!data.notify_empty,
+            $notify_inactivity_hours: parseInt(data.notify_inactivity_hours) || 0
+        });
+        db.run("UPDATE users SET phone_number=$phone_number, notify_consumption=$notify_consumption, notify_refilling=$notify_refilling, notify_empty=$notify_empty, notify_inactivity_hours=$notify_inactivity_hours WHERE id=$userId",
+               {
+                   $userId,
+                   $phone_number: data.phone_number || null,
+                   $notify_consumption: !!data.notify_consumption,
+                   $notify_refilling: !!data.notify_refilling,
+                   $notify_empty: !!data.notify_empty,
+                   $notify_inactivity_hours: parseInt(data.notify_inactivity_hours) || 0
+               },
+               callback);
+    },
+
+    addEvent: ($delta, $weight, $temperature) => {
+        const date = new Date();
         const $timestamp = date.getTime() / 1000; // in seconds
         const $hours = date.getHours();
         const $days = timeToDays(date);

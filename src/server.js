@@ -16,6 +16,7 @@ const serial = require("./serial");
 const flash = require('connect-flash');
 
 const app = express();
+const pet_name = config.get('pet_name');
 
 // Middlewares
 
@@ -35,6 +36,7 @@ app.use((req, res, next) => {
     req.renderContext = {
         user : req.user,
         page: req.path,
+        pet_name,
         messages: t => req.flash(t),
         weightNow: serial.getLastWeight(),
         temperature : serial.getLastTemperature()
@@ -95,5 +97,18 @@ app.get('/api/trends', controllers.trends.api);
 
 app.get('/punchcard', controllers.punchcard.page);
 app.get('/api/punchcard', controllers.punchcard.api);
+
+app.get('/preferences', controllers.preferences.form);
+app.post('/preferences', controllers.preferences.update);
+
+if (config.get("serial.mock_enabled")) {
+    app.post('/api/mock', (req, res) => {
+        const weight = req.query.weight || req.query.w;
+        const temperature = req.query.temperature || req.query.t || 0;
+
+        serial.sendMockReading(weight, temperature);
+        res.sendStatus(201);
+    });
+}
 
 module.exports = app;

@@ -49,7 +49,7 @@ module.exports = {
                 } else {
                     passport.authenticate('local')(req, res, () => {
                         req.flash("success","You are signed up");
-                        res.redirect('/');
+                        res.redirect('/preferences');
                     });
                 }
             });

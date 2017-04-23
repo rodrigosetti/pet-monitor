@@ -4,5 +4,6 @@ module.exports = {
     events : require('./events'),
     trends: require('./trends'),
     punchcard: require('./punchcard'),
-    auth: require('./auth')
+    auth: require('./auth'),
+    preferences: require('./preferences')
 };

@@ -40,6 +40,7 @@
     "passport-local": "^1.0.0",
     "properties": "^1.2.1",
     "pug": "^2.0.0-beta11",
+    "request": "^2.81.0",
     "serialport": "^4.0.7",
     "sqlite3": "^3.1.8",
     "winston": "^2.3.1"

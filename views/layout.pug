@@ -40,7 +40,7 @@ html(lang="en")
                 span.icon-bar
                 span.icon-bar
                 span.icon-bar
-              a.navbar-brand(href="/") #{ctx.weightNow} g | #{ctx.temperature}° C
+              a.navbar-brand(href="/") #{ctx.pet_name} | #{ctx.weightNow} g | #{ctx.temperature}° C
             #navigationbar.collapse.navbar-collapse
               ul.nav.navbar-nav
                 li(class=ctx.page==="/events" && "active"): a(href="/events")  Events
@@ -49,12 +49,13 @@ html(lang="en")
 
               ul.nav.navbar-nav.navbar-right
                 if ctx.user
+                  li(class=ctx.page==="/preferences" && "active"): a(href="/preferences") Preferences
                   li: a(href="/logout", display="inline") logout #{ctx.user.username}
                 else
                   li(class=ctx.page==="/login" && "active"): a(href="/login") login
                   li(class=ctx.page==="/signup" && "active"): a(href="/signup") signup
 
-        .container-fluid
+        .container
           each msg in ctx.messages("success")
             .alert.alert-success(role="alert")= msg
           each msg in ctx.messages("error")

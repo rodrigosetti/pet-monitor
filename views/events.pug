@@ -3,7 +3,7 @@ extends ./layout
 block content
   form(method='GET', action='/events').form-inline
     .form-group
-       input(type="text", name="q", id="q", value=query).form-control
+       input(type="text", required=true, name="q", id="q", value=query).form-control
        button(type="submit").btn.btn-default OK
 
   hr
