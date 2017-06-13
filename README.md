@@ -22,12 +22,13 @@ Features
 
  * Track **refilling** and **consumption** events.
  * Compute consumption trends over days.
+ * Notification via SMS for events like consumption, refilling, and inactivity period (via [Twillio](https://www.twilio.com/) integration).
 
 ### Planned
 
  * Compute consumption trends over weeks.
  * Compute consumption trends over hours & weekdays (punch card).
- * Notification via SMS (weight threshold, mismatched prediction, inactivity period, _etc._).
+ * Use machine learning to identify anomalies (too much/low consumption).
 
 Requirements
 ------------
