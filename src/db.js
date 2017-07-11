@@ -4,6 +4,7 @@ const winston = require('winston');
 const config = require('config');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const cache = require('./cache');
 let sqlite3 = require('sqlite3');
 
 const db = new sqlite3.Database(path.join(__dirname, '..', 'data.db'));
@@ -166,7 +167,7 @@ module.exports = {
         const startOfWeekDay = today - date.getDay();
         const weeks = [];
 
-        function queryWeek(week) {
+        function queryWeek(week, cb) {
             // both $since and $to are sundays
             const $since = startOfWeekDay - ((week+1) * 7);
             const $to = startOfWeekDay - (week * 7);
@@ -200,7 +201,7 @@ module.exports = {
                            weeks.push(weekDayToHourValues);
 
                            if (rows.length && week < 52) {
-                               queryWeek(week + 1);
+                               queryWeek(week + 1, cb);
                            } else {
                                // done: compute average
                                const result = {
@@ -227,12 +228,12 @@ module.exports = {
                                    }
                                });
 
-                               callback(null, result);
+                               cb(null, result);
                            }
                        }
                    });
         }
 
-        queryWeek(0);
+        cache("punchcard", MILLIS_IN_DAYS, (cb) => { queryWeek(0, cb); }, callback);
     }
 };
