@@ -7,16 +7,15 @@ const controllers = require('./controllers');
 const morgan = require('morgan');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const basicAuth = require('express-basic-auth')
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const db = require('./db');
 const bcrypt = require('bcrypt');
-const serial = require("./serial");
 const flash = require('connect-flash');
 
 const app = express();
-const pet_name = config.get('pet_name');
 
 // Middlewares
 
@@ -36,10 +35,10 @@ app.use((req, res, next) => {
     req.renderContext = {
         user : req.user,
         page: req.path,
-        pet_name,
+        pet_name: db.getLastPetName(),
         messages: t => req.flash(t),
-        weightNow: serial.getLastWeight(),
-        temperature : serial.getLastTemperature()
+        weightNow: db.getLastWeight(),
+        temperature: db.getLastTemperature()
     };
     next();
 });
@@ -101,14 +100,10 @@ app.get('/api/punchcard', controllers.punchcard.api);
 app.get('/preferences', controllers.preferences.form);
 app.post('/preferences', controllers.preferences.update);
 
-if (config.get("serial.mock_enabled")) {
-    app.post('/api/mock', (req, res) => {
-        const weight = req.query.weight || req.query.w;
-        const temperature = req.query.temperature || req.query.t || 0;
-
-        serial.sendMockReading(weight, temperature);
-        res.sendStatus(201);
-    });
-}
+app.use('/api/event/',
+      express.Router()
+        .use(bodyParser())
+        .use(basicAuth({ users: { [config.get('cloud.user')] : config.get('cloud.password') } }))
+        .post('/food', controllers.api.foodEvent));
 
 module.exports = app;

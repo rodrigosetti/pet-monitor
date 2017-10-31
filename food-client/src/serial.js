@@ -3,26 +3,22 @@
 const SerialPort = require('serialport');
 const config = require('config');
 const winston = require('winston');
-const db = require('./db');
-const notifications = require('./notifications');
+const cloud = require('./cloud');
 
-const RAW_TARE = config.get('raw_tare');
-const CONTAINER_TARE = config.get('container_tare');
-const CALIBRATION_G = config.get('calibration_g');
-const STABLE_N = config.get('stable_n');
+const RAW_TARE = config.get('scale.raw_tare');
+const CONTAINER_TARE = config.get('scale.container_tare');
+const CALIBRATION_G = config.get('scale.calibration_g');
+const STABLE_N = config.get('scale.stable_n');
 
 const weightWindow = [];
 let ready = false;
 let lastStable;
-let currentTemperature;
 
 function calibratedScale(raw) {
     return Math.round( (RAW_TARE - raw) / CALIBRATION_G );
 }
 
 function processReading(weight, temperature) {
-    currentTemperature = temperature;
-
     weightWindow.push( weight );
     if (weightWindow.length > STABLE_N) { weightWindow.shift(); }
 
@@ -44,8 +40,8 @@ function processReading(weight, temperature) {
                     // consume
                     winston.info('CONSUMED: %s g', -delta);
                 }
-                db.addEvent(delta, weight, temperature);
-                notifications.sendNotifications(delta, weight, temperature);
+                const pet_name = config.get('pet.name');
+                cloud.sendData(pet_name, delta, weight, temperature)
             }
         }
 
@@ -82,10 +78,3 @@ if (config.get('serial.enabled')) {
         }
     });
 }
-
-module.exports = {
-    getLastWeight: () => weightWindow.length > 0 ? weightWindow[weightWindow.length-1] : undefined,
-    getLastTemperature: () => currentTemperature,
-
-    sendMockReading: processReading
-};

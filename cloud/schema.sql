@@ -24,5 +24,6 @@ CREATE TABLE users (
   notify_consumption BOOLEAN,
   notify_refilling BOOLEAN,
   notify_empty BOOLEAN,
-  notify_inactivity_hours INTEGER
+  notify_inactivity_hours INTEGER,
+  consumption_anomaly_threshold REAL
 );

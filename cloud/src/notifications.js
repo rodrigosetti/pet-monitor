@@ -6,7 +6,6 @@ const config = require('config');
 const request = require('request');
 
 const MILLIS_IN_HOURS = 60 * 60 * 1000;
-const pet_name = config.get("pet_name");
 
 let lastConsumption = Date.now();
 
@@ -39,21 +38,21 @@ function sendMessage(phone_number, message) {
     });
 }
 
-function notifyConsumption(phone_number, delta, weight, temperature) {
+function notifyConsumption(pet_name, phone_number, delta, weight, temperature) {
     sendMessage(
         phone_number,
         `${pet_name} consumed ${-delta} g (now: ${weight} g, ${temperature} C)`
     );
 }
 
-function notifyRefilling(phone_number, delta, weight, temperature) {
+function notifyRefilling(pet_name, phone_number, delta, weight, temperature) {
     sendMessage(
         phone_number,
         `${pet_name} food refilled by ${delta} g (now: ${weight} g, ${temperature} C)`
     );
 }
 
-function notifyEmpty(phone_number, delta, temperature) {
+function notifyEmpty(pet_name, phone_number, delta, temperature) {
     sendMessage(
         phone_number,
         `${pet_name} consumed ${-delta} g and left empty container (temp: ${temperature} C)`
@@ -69,15 +68,40 @@ function notifyInactivity(phone_number, amount) {
     );
 }
 
+function notifyAnomaly(phone_number, consumption, expected) {
+    sendMessage(
+        phone_number,
+        `In the last hour, ${pet_name} consumed ${consumption} g, but usually it's expected ${expected}`
+    );
+}
+
+function lastHourConsumption() {
+    // TODO
+    return 0;
+}
+
+function lastHourExpectedConsumption() {
+    // TODO
+    return 0;
+}
+
 const tid = setInterval(() => {
     db.getUsers(
         (err, user) => {
             if (err) {
                 winston.error(err);
             } else {
+                // determine if it needs to notify inactivity
                 const inactive_hours = inactiveHours();
                 if (inactive_hours > 0 && inactive_hours == user.notify_inactivity_hours) {
                     notifyInactivity(user.phone_number, inactive_hours);
+                }
+
+                // determine if it needs to notify anomalous consumption
+                const consumption_last_hour = lastHourConsumption();
+                const expected_consumption = lastHourExpectedConsumption();
+                if (Math.abs(consumption_last_hour - expected_consumption) > user.consumption_anomaly_threshold) {
+                    notifyAnomaly(user.phone_number, consumption_last_hour, expected_consumption);
                 }
             }
         },
@@ -92,7 +116,7 @@ const tid = setInterval(() => {
 
 module.exports = {
 
-    sendNotifications: (delta, weight, temperature) => {
+    sendNotifications: (pet_name, delta, weight, temperature) => {
         db.getUsers(
             (err, user) => {
                 const phone_number = user.phone_number;
@@ -100,11 +124,11 @@ module.exports = {
                 if (err) {
                     winston.error(err);
                 } else if (user.notify_empty && weight <= 0) {
-                    notifyEmpty(phone_number, delta, temperature);
+                    notifyEmpty(pet_name, phone_number, delta, temperature);
                 } else if (user.notify_consumption && delta < 0) {
-                    notifyConsumption(phone_number, delta, weight, temperature);
+                    notifyConsumption(pet_name, phone_number, delta, weight, temperature);
                 } else if (user.notify_refilling && delta > 0) {
-                    notifyRefilling(phone_number, delta, weight, temperature);
+                    notifyRefilling(pet_name, phone_number, delta, weight, temperature);
                 }
             },
             (err, n) => {

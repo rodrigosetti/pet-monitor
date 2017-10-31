@@ -37,7 +37,15 @@ function findUserByUsername($username, callback) {
     db.get("SELECT * FROM users WHERE username=$username", { $username }, callback);
 }
 
+let currentWeight;
+let currentTemperature;
+let currentPet;
+
 module.exports = {
+    getLastWeight: () => currentWeight,
+    getLastTemperature: () => currentTemperature,
+    getLastPet: () => currentPet,
+
     findUserById: ($id, callback) => {
         db.get("SELECT * FROM users WHERE id=$id", { $id }, callback);
     },
@@ -94,7 +102,11 @@ module.exports = {
                callback);
     },
 
-    addEvent: ($delta, $weight, $temperature) => {
+    addEvent: ($pet_name, $delta, $weight, $temperature) => {
+        currentPet = $pet_name;
+        currentWeight = $weight;
+        currentTemperature = $temperature;
+
         const date = new Date();
         const $timestamp = date.getTime() / 1000; // in seconds
         const $hours = date.getHours();
