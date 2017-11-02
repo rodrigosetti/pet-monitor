@@ -1,4 +1,4 @@
-# Smart Pet Food Tracker
+# Pet Monitor
 
 Make your pet's food bowl smarter by tracking refilling and consumption
 automatically.
